@@ -53,30 +53,33 @@ def WriteToFile(data_set, fileName):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("cuisine", type=str, nargs=1, help="Cuisine directory name to turn into data set")
-    args = parser.parse_args()
+    #parser = argparse.ArgumentParser()
+    #parser.add_argument("cuisine", type=str, nargs=1, help="Cuisine directory name to turn into data set")
+    #args = parser.parse_args()
+    cuisine_list = ["african", "chinese", "indian", "italian", "mexican", "caribbean", \
+            "french", "irish", "japanese", "middleeastern"]
+    
+    for cuisine in cuisine_list:
+        
+       # cuisine = str(args.cuisine[0])
+        path = "html/" + cuisine + "/"
+        file_list = sorted(os.listdir(path))
+        fileName = "Data/" + cuisine + ".txt"
+        data_set = []
 
-    cuisine = str(args.cuisine[0])
-    path = "html/" + cuisine + "/"
-    file_list = sorted(os.listdir(path))
-    fileName = "Data/" + cuisine + ".txt"
+        for html_file in file_list:
+            print(html_file)
+            temp = open(path + html_file)
+            html = temp.read()
+            temp.close()
 
-    data_set = []
+            recipeData = ParseRecipe(html)
 
-    for html_file in file_list:
-        print(html_file)
-        temp = open(path + html_file)
-        html = temp.read()
-        temp.close()
+            ingredients = FormatData(recipeData[0])
+            instructions = FormatData(recipeData[1])
+            data_set.append(ingredients + " " + instructions)
 
-        recipeData = ParseRecipe(html)
-
-        ingredients = FormatData(recipeData[0])
-        instructions = FormatData(recipeData[1])
-        data_set.append(ingredients + " " + instructions)
-
-    WriteToFile(data_set, fileName)
+        WriteToFile(data_set, fileName)
 
     return 0
 
