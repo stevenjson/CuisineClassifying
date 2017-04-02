@@ -1,10 +1,17 @@
 import urllib
-
+import argparse
 from bs4 import BeautifulSoup
 
-filename = "html/test.html"
-cuisine = "chinese"
-main_url = "http://allrecipes.com/recipes/695/world-cuisine/asian/chinese/?page=1"
+parser = argparse.ArgumentParser()
+parser.add_argument("url", type=str, nargs=1, help="Main url with list of recipe URLs")
+parser.add_argument("cuisine", type=str, nargs=1, help="Type of cuisine on the main url page")
+parser.add_argument("pageNum", type=int, nargs=1, help="Page number to pull from")
+parser.add_argument("fileStart", type=int, nargs=1, help="number to start filenames on")
+args = parser.parse_args()
+
+cuisine = str(args.cuisine[0]).lower()
+page = str(args.pageNum[0])
+main_url = str(args.url[0]) + "?page=" + page
 
 try:local_filename, headers = urllib.request.urlretrieve(main_url)
 except:
@@ -28,13 +35,13 @@ for item in div:
                 
 url_file.close()
 
-filenum = 0
+filenum = int(args.fileStart[0])
 for url in url_list:
     urlname = "http://allrecipes.com" + url
     html_filename = "html/" + cuisine +"/" + cuisine + str(filenum) + ".html"
 
     html_file = open(html_filename, 'w')
-    print(urlname)
+    print(urlname, filenum)
     
     try:local_filename, headers = urllib.request.urlretrieve(urlname)
     except:
@@ -50,3 +57,5 @@ for url in url_list:
     file_.close()
     
     filenum += 1
+
+print("File to start on: ", filenum)
