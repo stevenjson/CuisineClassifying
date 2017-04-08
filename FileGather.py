@@ -58,7 +58,6 @@ for url in url_list:
     file_.close()
     
     filenum += 1
-    if filenum > 99:
-        break
+    
 
-print("File to start on: ", filenum)
+print("Done")
