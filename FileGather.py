@@ -1,4 +1,5 @@
 import urllib
+import os
 import argparse
 from bs4 import BeautifulSoup
 
@@ -6,7 +7,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("url", type=str, nargs=1, help="Main url with list of recipe URLs")
 parser.add_argument("cuisine", type=str, nargs=1, help="Type of cuisine on the main url page")
 parser.add_argument("pageNum", type=int, nargs=1, help="Page number to pull from")
-parser.add_argument("fileStart", type=int, nargs=1, help="number to start filenames on")
+#parser.add_argument("fileStart", type=int, nargs=1, help="number to start filenames on")
 args = parser.parse_args()
 
 cuisine = str(args.cuisine[0]).lower()
@@ -35,7 +36,7 @@ for item in div:
                 
 url_file.close()
 
-filenum = int(args.fileStart[0])
+filenum = len(os.listdir("html/" + cuisine))
 for url in url_list:
     urlname = "http://allrecipes.com" + url
     html_filename = "html/" + cuisine +"/" + cuisine + str(filenum) + ".html"
@@ -57,5 +58,7 @@ for url in url_list:
     file_.close()
     
     filenum += 1
+    if filenum > 99:
+        break
 
 print("File to start on: ", filenum)
