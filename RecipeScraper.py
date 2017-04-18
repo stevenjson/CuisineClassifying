@@ -56,8 +56,8 @@ def main():
     #parser = argparse.ArgumentParser()
     #parser.add_argument("cuisine", type=str, nargs=1, help="Cuisine directory name to turn into data set")
     #args = parser.parse_args()
-    cuisine_list = ["african", "chinese", "indian", "italian", "mexican", "caribbean", \
-            "french", "irish", "japanese", "middleeastern"]
+    cuisine_list = [ "chinese",  "italian", "mexican", "caribbean", \
+            "french", "irish", "japanese", "middleeastern", "african", "indian"]
     
     for cuisine in cuisine_list:
         

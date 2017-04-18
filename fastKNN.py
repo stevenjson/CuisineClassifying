@@ -55,8 +55,8 @@ def kNN(testMap, trainMap, k):
         #print(testCuisine)
         gc = 0
         gt = 0
-        if testCuisine != "african":
-            continue
+        #if testCuisine != "african":
+            #continue
         for testRecipe in testMap[testCuisine]:
             recipeMap = {}
             for trainCuisine in trainMap.keys():
