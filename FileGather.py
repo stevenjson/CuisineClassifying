@@ -1,4 +1,4 @@
-import urllib
+import urllib.request
 import os
 import argparse
 from bs4 import BeautifulSoup
@@ -12,11 +12,12 @@ args = parser.parse_args()
 
 cuisine = str(args.cuisine[0]).lower()
 page = str(args.pageNum[0])
-main_url = str(args.url[0]) + "?page=" + page
+main_url = str(args.url[0]) + "?sort=Newest&page=" + page
 
+#local_filename, headers = urllib.request.urlretrieve(main_url)
 try:local_filename, headers = urllib.request.urlretrieve(main_url)
 except:
-    print("\n### Unable to open webpage " + url + " ### \n")
+    print("\n### Unable to open webpage " + main_url + " ### \n")
     exit(-1)
 
 url_file = open(local_filename)
@@ -38,6 +39,8 @@ url_file.close()
 
 filenum = len(os.listdir("html/" + cuisine))
 for url in url_list:
+    if filenum > 160:
+        break
     urlname = "http://allrecipes.com" + url
     html_filename = "html/" + cuisine +"/" + cuisine + str(filenum) + ".html"
 

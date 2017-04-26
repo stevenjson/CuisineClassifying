@@ -63,11 +63,18 @@ def main():
         
        # cuisine = str(args.cuisine[0])
         path = "html/" + cuisine + "/"
+        testPath = "html/" + cuisine + "/test/"
+
         file_list = sorted(os.listdir(path))
+        test_file_list = sorted(os.listdir(testPath))
+
         fileName = "Data/" + cuisine + ".txt"
         data_set = []
 
         for html_file in file_list:
+            if html_file == "test":
+                continue
+
             print(html_file)
             temp = open(path + html_file)
             html = temp.read()
@@ -77,7 +84,19 @@ def main():
 
             ingredients = FormatData(recipeData[0])
             instructions = FormatData(recipeData[1])
-            data_set.append(ingredients + " " + instructions)
+            data_set.append(ingredients + " | " + instructions)
+
+        for html_file in test_file_list:
+            print(html_file)
+            temp = open(testPath + html_file)
+            html = temp.read()
+            temp.close()
+
+            recipeData = ParseRecipe(html)
+
+            ingredients = FormatData(recipeData[0])
+            instructions = FormatData(recipeData[1])
+            data_set.append(ingredients + " | " + instructions)
 
         WriteToFile(data_set, fileName)
 

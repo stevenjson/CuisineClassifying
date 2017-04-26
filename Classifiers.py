@@ -54,14 +54,15 @@ def MakeFolds(foldNum, foldDiv, RecipeMap, foldList):
                     else:
                         foldList[j].train[cuisine] = [RecipeMap[cuisine][i]]
 
-def PrintStats(stats, cuisineList, foldNum):
+def PrintStats(stats, cuisineList, foldNum, foldLen, foldDiv):
     total_correct = 0
+    #print(foldNum, foldLen, foldDiv)
 
     for cuisine in cuisineList:
         total_correct += stats[cuisine]
-        print(cuisine, ": {:.2f}".format(stats[cuisine] / 120.0))
+        print(cuisine, ": {:.2f}".format(stats[cuisine] / float(foldLen)))
 
-    total = 600
+    total = len(cuisineList) * foldLen
 
     print("OVERALL: {:.2f}".format(total_correct / float(total)))
     
@@ -143,9 +144,10 @@ def kNN(testMap, trainMap, k, stats, cuisineList):
 def SVM(trainMap, testMap, cuisineList, stats):
 
     #text_clf = Pipeline([('vect', CountVectorizer()), ('tfidf', TfidfTransformer()), ('clf', MultinomialNB()),])
-    text_clf = Pipeline([('vect', CountVectorizer()), ('tfidf', TfidfTransformer()), ('clf', SGDClassifier(loss='log', penalty='l2', alpha=1e-3, n_iter=1000, random_state=42)),])
+    text_clf = Pipeline([('vect', CountVectorizer(ngram_range=(2, 2))), ('tfidf', TfidfTransformer()), ('clf', SGDClassifier(loss='log', penalty='l2', alpha=1e-3, n_iter=1000, random_state=42)),])
 
     text_clf = text_clf.fit(trainMap, cuisineList)
+    #vect.get_feature_names()
     total_all = 0
     correct_all = 0
     for cuisineName in cuisineList:
@@ -214,22 +216,19 @@ def main():
     
     k = args.k
     classifier = args.classifier
-    trainPath = "Data/train/"
-    testPath = "Data/test/"
-    trainFileList = os.listdir(trainPath)
-    testFileList = os.listdir(testPath)
+    trainPath = "Data/"
+    trainFileList = ["chinese.txt", "caribbean.txt", "french.txt", "italian.txt", "mexican.txt"]
 
     RecipeMap = {}
     cuisineList = []
     stats = {}
 
-    foldDiv = 6
+    foldDiv = 6 # Number of folds to use
 
     #for _file in testFileList:
     #    cuisine = _file.strip("test-").strip(".txt")
     #    recipeList = GetFile(_file, testPath)
     #    testMap[cuisine] = recipeList
-
 
     for _file in trainFileList:
         cuisine = _file.strip(".txt")
@@ -237,7 +236,8 @@ def main():
         recipeList = GetFile(_file, trainPath)
         RecipeMap[cuisine] = recipeList
 
-    foldNum = len(RecipeMap[cuisineList[0]]) / foldDiv
+    foldLen = len(RecipeMap[cuisineList[0]])
+    foldNum = foldLen / foldDiv
 
     foldList = []
     MakeFolds(foldNum, foldDiv, RecipeMap, foldList)
@@ -291,7 +291,7 @@ def main():
         print()
         num +=1
     
-    PrintStats(stats, cuisineList, foldNum)
+    PrintStats(stats, cuisineList, foldNum, foldLen, foldDiv)
     
     pass
 
