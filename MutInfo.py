@@ -63,19 +63,56 @@ def MutInfo(word, countMap, foldSize, totalSize, recipeList, cuisineList):
 
         mutInfo += (probWordClass * pointMut)
 
-
-
     return mutInfo
+
+def PrintInfo(probMap, countMap, cuisineList, cuisine, n):
+    print()
+
+    if cuisine == "all":
+        for word in sorted(probMap, key=probMap.get, reverse=True)[:n]:
+            maxId = 0
+            maxCount = 0
+            for i in range(len(countMap[word])):
+                if countMap[word][i] > maxCount:
+                    maxId = i
+                    maxCount = countMap[word][i]
+            print("{:15s}: {:.5f}   {:10s}".format(word, probMap[word], cuisineList[maxId]))
+            print()
+            #print("Counts: {}".format(countMap[word]))
+            #print(cuisineList)
+    elif cuisine in cuisineList:
+        cuisineCount = 0
+        for word in sorted(probMap, key=probMap.get, reverse=True):
+            if cuisineCount > n:
+                break
+            
+            maxId = 0
+            maxCount = 0
+            for i in range(len(countMap[word])):
+                if countMap[word][i] > maxCount:
+                    maxId = i
+                    maxCount = countMap[word][i]
+
+            if cuisine == cuisineList[maxId]:
+                print("{:15s}: {:.5f}   {:10s}".format(word, probMap[word], cuisineList[maxId]))
+                print()
+                cuisineCount += 1
+
+    pass
+
+
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("feature", type=str, help="Type of feature to use. ")
     parser.add_argument("topN", type=int, help="Top N words to display")
+    parser.add_argument("cuisine", type=str, help="Cuisine of interest [all for all cuisines]")
     args = parser.parse_args()
 
     fileList = ["chinese.txt", "caribbean.txt", "french.txt", "italian.txt", "mexican.txt"]
 
     feature = args.feature
+    cuisineInfo = args.cuisine
     
     if feature != "none":
         filePath = "Data/features/" + feature + "/"
@@ -111,23 +148,9 @@ def main():
         if word == "" or  word == " ":
             continue
         probMap[word] = MutInfo(word, countMap, foldSize, totalSize, recipeList, cuisineList)
-
-    print()
-
-    for word in sorted(probMap, key=probMap.get, reverse=True)[:n]:
-        maxId = 0
-        maxCount = 0
-        for i in range(len(countMap[word])):
-            if countMap[word][i] > maxCount:
-                maxId = i
-                maxCount = countMap[word][i]
-        print("{:15s}: {:.5f}   {:10s}".format(word, probMap[word], cuisineList[maxId]))
-        print()
-        #print("Counts: {}".format(countMap[word]))
-        #print(cuisineList)
         
 
-    #TopN(mutualMap, n)
+    PrintInfo(probMap, countMap, cuisineList, cuisineInfo, n)
 
     pass
 
