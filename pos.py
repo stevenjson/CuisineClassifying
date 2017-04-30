@@ -50,10 +50,14 @@ def PoS(wordMap, cuisineList, verbList):
 def main():
     fileList = ["chinese.txt", "caribbean.txt", "french.txt", "italian.txt", "mexican.txt"]
     verbList = ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]
+    nounList = ["NN", "NNS", "NNP", "NNPS"]
+    verbNounList = verbList + nounList
     filePath = "Data/"
-    posPath = "Data/pos/"
-    ingPath = "Data/pos/ingredients/"
-    verbPath = "Data/pos/verbs/"
+    posPath = "Data/features/pos/"
+    ingPath = "Data/features/ingredients/"
+    verbPath = "Data/features/verbs/"
+    nounPath = "Data/features/nouns/"
+    verbNounPath = "Data/features/verbnouns/"
 
     ingMap = {}
     verbMap = {}
@@ -79,6 +83,8 @@ def main():
 
     #ingred = PoS(ingMap, cuisineList)
     pos = PoS(verbMap, cuisineList, verbList)
+    noun = PoS(verbMap, cuisineList, nounList)[0]
+    verbnoun = PoS(verbMap, cuisineList, verbNounList)[0]
     verb = pos[0]
     posMap = pos[1]
 
@@ -88,6 +94,9 @@ def main():
         WriteToFile(filename, verbPath, verb[cuisine])
         WriteToFile(filename, ingPath, ingMap[cuisine])
         WriteToFile(filename, posPath, posMap[cuisine])
+        WriteToFile(filename, nounPath, noun[cuisine])
+        WriteToFile(filename, verbNounPath, verbnoun[cuisine])
+
 
 
 
