@@ -45,19 +45,39 @@ def PoS(wordMap, cuisineList, verbList):
                 
     return [verbMap, posMap]
 
+def GetGivenWords(wordList, wordMap, cuisineList):
+    wordOutMap = {}
+    for cuisine in cuisineList:
+        wordOutMap[cuisine] = []
+        for recipe in wordMap[cuisine]:
+            recipeStr = ""
+            recipe = recipe.split(" ")
+            for word in recipe:
+                if word.lower() in wordList:
+                    recipeStr += (word.lower() + " ")
+
+            wordOutMap[cuisine].append(recipeStr)
+
+    return wordOutMap
 
 
 def main():
+
     fileList = ["chinese.txt", "caribbean.txt", "french.txt", "italian.txt", "mexican.txt"]
     verbList = ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]
     nounList = ["NN", "NNS", "NNP", "NNPS"]
     verbNounList = verbList + nounList
+    wordFile = open("Data/features/cookverbs/cookingverbs.csv")
+    wordList = wordFile.read().lower().split("\n")
+    wordFile.close()
+
     filePath = "Data/"
     posPath = "Data/features/pos/"
     ingPath = "Data/features/ingredients/"
     verbPath = "Data/features/verbs/"
     nounPath = "Data/features/nouns/"
     verbNounPath = "Data/features/verbnouns/"
+    cookingPath = "Data/features/cookverbs/"
 
     ingMap = {}
     verbMap = {}
@@ -81,10 +101,11 @@ def main():
             else:
                 ingMap[cuisine] = [splitRecipe[0]]
 
-    #ingred = PoS(ingMap, cuisineList)
+    ingred = PoS(ingMap, cuisineList)
     pos = PoS(verbMap, cuisineList, verbList)
     noun = PoS(verbMap, cuisineList, nounList)[0]
     verbnoun = PoS(verbMap, cuisineList, verbNounList)[0]
+    cookVerbs = GetGivenWords(wordList, verbMap, cuisineList)
     verb = pos[0]
     posMap = pos[1]
 
@@ -96,8 +117,6 @@ def main():
         WriteToFile(filename, posPath, posMap[cuisine])
         WriteToFile(filename, nounPath, noun[cuisine])
         WriteToFile(filename, verbNounPath, verbnoun[cuisine])
-
-
-
+        WriteToFile(filename, cookingPath, cookVerbs[cuisine])
 
 main()
