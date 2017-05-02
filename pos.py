@@ -101,7 +101,6 @@ def main():
             else:
                 ingMap[cuisine] = [splitRecipe[0]]
 
-    ingred = PoS(ingMap, cuisineList)
     pos = PoS(verbMap, cuisineList, verbList)
     noun = PoS(verbMap, cuisineList, nounList)[0]
     verbnoun = PoS(verbMap, cuisineList, verbNounList)[0]

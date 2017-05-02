@@ -141,8 +141,6 @@ def main():
     recipeList = set(recipeStr.split(" "))
 
     countMap = Count(recipeMap, cuisineList, recipeList)
-
-    mutInfo = MutInfo("soy", countMap, foldSize, totalSize, recipeList, cuisineList)
     
     for word in recipeList:
         if word == "" or  word == " ":
