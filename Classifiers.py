@@ -63,11 +63,11 @@ def WriteStats(stats, cuisineList, foldNum, foldLen, foldDiv, path, fileName):
 
     for cuisine in cuisineList:
         total_correct += stats[cuisine]
-        _file.write(cuisine + " {:.2f}\n".format(stats[cuisine] / float(foldLen)))
+        _file.write(cuisine + " {:.4f}\n".format(stats[cuisine] / float(foldLen)))
 
     total = len(cuisineList) * foldLen
 
-    _file.write("OVERALL {:.2f}".format(total_correct / float(total)))
+    _file.write("OVERALL {:.4f}".format(total_correct / float(total)))
 
     _file.close()
 
@@ -78,38 +78,39 @@ def PrintStats(stats, cuisineList, foldNum, foldLen, foldDiv):
 
     for cuisine in cuisineList:
         total_correct += stats[cuisine]
-        print(cuisine, ": {:.2f}".format(stats[cuisine] / float(foldLen)))
+        print(cuisine, ": {:.4f}".format(stats[cuisine] / float(foldLen)))
 
     total = len(cuisineList) * foldLen
 
-    print("OVERALL: {:.2f}".format(total_correct / float(total)))
+    print("OVERALL: {:.4f}".format(total_correct / float(total)))
     
 
 ### KNN functions ##############################################################
 
-def GuessCuisine(recipeMap, k):
+def GuessCuisine(recipeMap, k, cuisineList):
     k_list = []
     for cuisine in recipeMap:
-        #print(recipeMap[cuisine])
         for i in range(k):
             k_list.append((hq.heappop(recipeMap[cuisine]), cuisine))
 
     guessList = sorted(k_list)
-    #print(guessList)
+    #if k == 1:
+        #print(guessList[0])
+
     guessTotal = {}
+    for cuisine in cuisineList:
+        guessTotal[cuisine] = 0
 
     for i in range(k):
         if guessList[i][1] in guessTotal.keys():
             guessTotal[guessList[i][1]] += 1
         else:
             guessTotal[guessList[i][1]] = 1
-            #print(guessList[i][1])
     
     max_total = 0
     max_cuisine = ""
-    #print()
-    #print(guessTotal)
-    for cuisine in guessTotal.keys():
+    
+    for cuisine in cuisineList:
         if max_total < guessTotal[cuisine]:
             max_total = guessTotal[cuisine]
             max_cuisine = cuisine
@@ -119,10 +120,10 @@ def GuessCuisine(recipeMap, k):
 
 def GetNeighbors(trainCuisine, testRecipe, trainMap):
     distList = []
+    total = 0
     for trainRecipe in trainMap[trainCuisine]:
         editDist = int(edist.eval(testRecipe, trainRecipe))
         hq.heappush(distList, editDist)
-    
     return distList
 
 
@@ -131,29 +132,27 @@ def kNN(testMap, trainMap, k, stats, cuisineList):
     correct = 0
 
     for testCuisine in cuisineList:
-        #print(testCuisine)
         gc = 0
         gt = 0
         #if testCuisine != "african":
             #continue
         for testRecipe in testMap[testCuisine]:
+
             recipeMap = {}
-            for trainCuisine in trainMap.keys():
-                #print(trainCuisine)
+            for trainCuisine in cuisineList:
                 recipeMap[trainCuisine] = GetNeighbors(trainCuisine, testRecipe, trainMap)
             
             for k in range(1, 31):
-                #print(k)
                 temp = copy.deepcopy(recipeMap)
-                guess = GuessCuisine(temp, k)
-                #print "Guess:", guess
+
+                guess = GuessCuisine(temp, k, cuisineList)
+
                 if guess == testCuisine:
                     correct += 1
                     stats[testCuisine][k-1] += 1
                     gc += 1
                 total += 1
                 gt += 1
-
         print (testCuisine, gc / float(gt))
         
     print ("FINAL:", correct / float(total))
@@ -164,10 +163,10 @@ def kNN(testMap, trainMap, k, stats, cuisineList):
 ### SVM Functions ##############################################################
 
 
-def SVM(trainMap, testMap, cuisineList, stats, sparsity):
+def SVM(trainMap, testMap, cuisineList, stats):
 
     #text_clf = Pipeline([('vect', CountVectorizer()), ('tfidf', TfidfTransformer()), ('clf', MultinomialNB()),])
-    text_clf = Pipeline([('vect', CountVectorizer(ngram_range=(1, 1), min_df=sparsity)), ('tfidf', TfidfTransformer()), ('clf', SGDClassifier(loss='log', penalty='l2', alpha=1e-3, n_iter=1000, random_state=42)),])
+    text_clf = Pipeline([('vect', CountVectorizer(ngram_range=(1, 1))), ('tfidf', TfidfTransformer()), ('clf', SGDClassifier(loss='log', penalty='l2', alpha=1e-3, n_iter=1000, random_state=42)),])
 
     text_clf = text_clf.fit(trainMap, cuisineList)
     #vect.get_feature_names()
@@ -235,13 +234,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("classifier", type=str, help="Type of classifier to use. [NB, SVM, KNN]")
     parser.add_argument("features", type=str, help="Which feature set to use")
-    parser.add_argument("sparsity", type=int, action='store', nargs='?',default=1, help="Sparsity parameter")
+    #parser.add_argument("sparsity", type=int, action='store', nargs='?',default=1, help="Sparsity parameter")
     parser.add_argument("k", type=int, action='store', nargs='?',default=0, help="Number of nearest neighbors to use.")
     args = parser.parse_args()
     
     k = args.k
-    sparsity = args.sparsity / float(100)
-    print(sparsity)
+    #sparsity = args.sparsity / float(100)
     feature = args.features
     classifier = args.classifier
     if feature != "none":
@@ -249,7 +247,7 @@ def main():
         outPath = "Graphs/" + feature + "/"
     else:
         trainPath = "Data/"
-        outPath = "Graphs/noFeature/sparsity/"
+        outPath = "Graphs/noFeature/"
 
     if classifier == "KNN":
         outPath += "KNN/"
@@ -291,6 +289,8 @@ def main():
         #print(len(foldList[i].test["chinese"]))
         #print(len(foldList[i].train["chinese"]))
 
+    totalCount = 0
+
     num = 1
     for fold in foldList:
         format_train = []
@@ -316,8 +316,9 @@ def main():
                 print("This classifier does not require a K. Exiting.")
                 exit(-1)
 
-            SVM(format_train, fold.test, cuisineList, stats, sparsity)
-            outFile = "SVM_{}.txt".format(sparsity)
+            SVM(format_train, fold.test, cuisineList, stats)
+            #outFile = "SVM_{}.txt".format(sparsity)
+            outFile = "SVM.txt"
 
         elif classifier == "KNN":
 
@@ -325,7 +326,8 @@ def main():
                 print("No specified K. Please enter a K value.")
                 exit(-1)
 
-            kNN(fold.test, fold.train, k, knnStats, cuisineList)
+            #print(fold.test["chinese"])
+            kNN(fold.test, fold.train, k, knnStats, cuisineList) 
 
         else:
             print("Invalid classifier. The options are NB, KNN, or SVM.")
@@ -333,18 +335,21 @@ def main():
 
         print()
         num +=1
-    
-    PrintStats(stats, cuisineList, foldNum, foldLen, foldDiv)
-    WriteStats(stats, cuisineList, foldNum, foldLen, foldDiv, outPath, outFile)
-    #for k in range(1, 31):
-        
-        #for cuisine in cuisineList:
-            #stats[cuisine] = knnStats[cuisine][k-1]
 
-        #outFile = "KNN_{}.txt".format(k)
-        #print(stats)
+    if classifier == "KNN":
+            
+        for k in range(1, 31):
+            
+            for cuisine in cuisineList:
+                stats[cuisine] = knnStats[cuisine][k-1]
 
-        #WriteStats(stats, cuisineList, foldNum, foldLen, foldDiv, outPath, outFile)
+            outFile = "KNN_{}.txt".format(k)
+            #print(stats)
+            WriteStats(stats, cuisineList, foldNum, foldLen, foldDiv, outPath, outFile)
+    else:
+        PrintStats(stats, cuisineList, foldNum, foldLen, foldDiv)
+        WriteStats(stats, cuisineList, foldNum, foldLen, foldDiv, outPath, outFile)
+
     
     pass
 
