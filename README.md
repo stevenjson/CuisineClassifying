@@ -42,6 +42,8 @@ To add recipes to the dataset, first you will need to run:
 
 python FileGather.py [allrecipe cuisine url] [cuisine] [page number] 
 
+Example of allrecipe url: http://allrecipes.com/recipes/695/world-cuisine/asian/chinese/
+
 Once you have downloaded all the recipes you want to add to the dataset you run
 
 python RecipeScraper.py
