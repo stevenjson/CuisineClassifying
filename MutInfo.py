@@ -110,16 +110,18 @@ def main():
     args = parser.parse_args()
 
     fileList = ["chinese.txt", "caribbean.txt", "french.txt", "italian.txt", "mexican.txt"]
+    featureList = ["unigram", "bigram", "verbs", "nouns", "verbnouns", "ingredients", "cookverbs"]
 
     feature = args.feature
     cuisineInfo = args.cuisine
     
-    if feature != "none":
+    if feature in featureList:
         filePath = "Data/features/" + feature + "/"
     else:
-        filePath = "Data/"
+        print("Invalid Feature. Available feature include:", featureList)
+        exit(-1)
 
-    n = args.topN
+    n = args.topN - 1
     foldSize = 180
     totalSize = 900
 
@@ -133,6 +135,9 @@ def main():
         recipeList = GetFile(_file, filePath)
         recipeMap[cuisine] = recipeList
 
+    if cuisineInfo not in cuisineList:
+        print("Invalid cuisine. Available cuisines include:", cuisineList)
+        exit(-1)
     recipeStr = ""
     for cuisine in cuisineList:
         for recipe in recipeMap[cuisine]:
