@@ -1,0 +1,6 @@
+chinese 0.6611
+caribbean 0.5000
+french 0.5222
+italian 0.5778
+mexican 0.5333
+OVERALL 0.5589
